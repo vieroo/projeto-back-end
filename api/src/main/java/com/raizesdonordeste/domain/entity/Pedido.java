@@ -21,14 +21,17 @@ public class Pedido {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "cliente_id")
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Usuario cliente;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatusPedido status;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private CanalPedido canalPedido;
 
+    @Column(nullable = false)
     private BigDecimal total;
 }

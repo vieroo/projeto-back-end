@@ -16,13 +16,14 @@ public class Estoque {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private int quantidade;
 
     @ManyToOne
-    @JoinColumn(name = "produto_id")
+    @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
     @ManyToOne
-    @JoinColumn(name = "unidade_id")
+    @JoinColumn(name = "unidade_id", nullable = false)
     private Unidade unidade;
 }

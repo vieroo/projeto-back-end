@@ -18,7 +18,9 @@ public class Produto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
 
+    @Column(nullable = false)
     private String nome;
 
+    @Column(nullable = false)
     private BigDecimal preco;
 }
