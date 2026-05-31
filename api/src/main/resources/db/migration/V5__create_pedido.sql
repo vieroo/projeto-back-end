@@ -11,5 +11,5 @@ CREATE TABLE pedido (
 
     CONSTRAINT fk_pedido_cliente
         FOREIGN KEY (cliente_id)
-            usuario(id)
+            REFERENCES usuario(id)
 );
