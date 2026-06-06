@@ -20,6 +20,6 @@ public class Fidelidade {
     private int pontos;
 
     @OneToOne
-    @JoinColumn(name = "cliehte_id", nullable = false)
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Usuario cliente;
 }
