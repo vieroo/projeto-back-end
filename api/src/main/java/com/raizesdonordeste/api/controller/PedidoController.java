@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/pedidos")
 @RequiredArgsConstructor
@@ -27,23 +29,23 @@ public class PedidoController {
                 .body(pedidoService.criar(request));
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<PedidoResponse>> listar() {
-//
-//        return ResponseEntity.ok(
-//                pedidoService.listar()
-//        );
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<PedidoResponse> buscarPorId(
-//            @PathVariable Long id
-//    ) {
-//
-//        return ResponseEntity.ok(
-//                pedidoService.buscarPorId(id)
-//        );
-//    }
+    @GetMapping
+    public ResponseEntity<List<PedidoResponse>> listar() {
+
+        return ResponseEntity.ok(
+                pedidoService.listar()
+        );
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PedidoResponse> buscarPorId(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                pedidoService.buscarPorId(id)
+        );
+    }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<PedidoResponse> atualizarStatus(

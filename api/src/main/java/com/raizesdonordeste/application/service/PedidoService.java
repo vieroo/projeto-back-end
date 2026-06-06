@@ -143,6 +143,35 @@ public class PedidoService {
 
     }
 
+    public List<PedidoResponse> listar() {
+
+        return pedidoRepository.findAll()
+                .stream()
+                .map(pedido -> new PedidoResponse(
+                        pedido.getId(),
+                        pedido.getStatus(),
+                        pedido.getCanalPedido(),
+                        pedido.getTotal(),
+                        converterItens(pedido.getId())
+                ))
+                .toList();
+    }
+
+    public PedidoResponse buscarPorId(Long id) {
+
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Pedido não encontrado"));
+
+        return new PedidoResponse(
+                pedido.getId(),
+                pedido.getStatus(),
+                pedido.getCanalPedido(),
+                pedido.getTotal(),
+                converterItens(pedido.getId())
+        );
+    }
+
     public PedidoResponse atualizarStatus(
             Long id,
             StatusPedido status
@@ -162,8 +191,20 @@ public class PedidoService {
 
         pedidoRepository.save(pedido);
 
-        List<ItemPedidoResponse> itens = itemPedidoRepository
-                .findByPedidoId(id)
+        return new PedidoResponse(
+                pedido.getId(),
+                pedido.getStatus(),
+                pedido.getCanalPedido(),
+                pedido.getTotal(),
+                converterItens(pedido.getId())
+        );
+    }
+
+    private List<ItemPedidoResponse> converterItens(
+            Long pedidoId
+    ) {
+
+        return itemPedidoRepository.findByPedidoId(pedidoId)
                 .stream()
                 .map(item -> new ItemPedidoResponse(
                         item.getProduto().getId(),
@@ -171,14 +212,6 @@ public class PedidoService {
                         item.getQuantidade()
                 ))
                 .toList();
-
-        return new PedidoResponse(
-                pedido.getId(),
-                pedido.getStatus(),
-                pedido.getCanalPedido(),
-                pedido.getTotal(),
-                itens
-        );
     }
 
 }
