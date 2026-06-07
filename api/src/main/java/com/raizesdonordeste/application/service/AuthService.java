@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -23,6 +25,14 @@ public class AuthService {
     public void registrar(
             RegistroUsuarioRequest request
     ) {
+        Optional<Usuario> usuarioComEmail = usuarioRepository.findByEmail(request.email());
+
+        if (usuarioRepository.findByEmail(request.email()).isPresent()) {
+            throw new BusinessException(
+                    "E-mail ja cadastrado"
+            );
+        }
+
         Usuario usuario = Usuario.builder()
                 .nome(request.nome())
                 .email(request.email())

@@ -5,6 +5,13 @@ import com.raizesdonordeste.api.request.PedidoRequest;
 import com.raizesdonordeste.api.response.PedidoResponse;
 import com.raizesdonordeste.application.service.PedidoService;
 import com.raizesdonordeste.domain.enums.CanalPedido;
+import com.raizesdonordeste.infraestructure.config.ErrorResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +23,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/pedidos")
 @RequiredArgsConstructor
+@Tag(
+        name = "Pedidos",
+        description = "Gerenciamento de pedidos"
+)
 
 public class PedidoController {
 
@@ -23,8 +34,36 @@ public class PedidoController {
 
     @PostMapping
     @PreAuthorize("hasRole('CLIENTE')")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Pedido criado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Estoque insuficiente ou pagamento recusado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Cliente, produto ou estoque não encontrado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Token inválido ou não informado"
+            )
+    })
     public ResponseEntity<PedidoResponse> criar(
-            @RequestBody PedidoRequest request
+           @Valid @RequestBody PedidoRequest request
     ) {
 
         return ResponseEntity
@@ -34,6 +73,21 @@ public class PedidoController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedidos encontrados"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Canal de pedido inválido",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            )
+    })
     public ResponseEntity<List<PedidoResponse>> listar(
             @RequestParam(required = false)
             CanalPedido canalPedido
@@ -52,6 +106,21 @@ public class PedidoController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pedido não encontrado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            )
+    })
     public ResponseEntity<PedidoResponse> buscarPorId(
             @PathVariable Long id
     ) {
@@ -63,9 +132,33 @@ public class PedidoController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Status atualizado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Status inválido para atualização",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pedido não encontrado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            )
+    })
     public ResponseEntity<PedidoResponse> atualizarStatus(
             @PathVariable Long id,
-            @RequestBody AtualizarStatusPedidoRequest request
+            @Valid @RequestBody AtualizarStatusPedidoRequest request
     ) {
 
         return ResponseEntity.ok(
@@ -78,6 +171,30 @@ public class PedidoController {
 
     @PatchMapping("/{id}/cancelar")
     @PreAuthorize("hasRole('CLIENTE')")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido cancelado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Pedido não pode ser cancelado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pedido não encontrado",
+                    content = @Content(
+                            schema = @Schema(
+                                    implementation = ErrorResponse.class
+                            )
+                    )
+            )
+    })
     public ResponseEntity<PedidoResponse> cancelar(
             @PathVariable Long id
     ) {

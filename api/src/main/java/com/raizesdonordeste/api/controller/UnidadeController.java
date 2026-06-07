@@ -4,6 +4,8 @@ import com.raizesdonordeste.api.request.UnidadeRequest;
 import com.raizesdonordeste.api.response.UnidadeResponse;
 import com.raizesdonordeste.application.service.UnidadeService;
 import com.raizesdonordeste.domain.entity.Unidade;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/unidades")
 @RequiredArgsConstructor
+@Tag(
+        name = "Unidades",
+        description = "Controle das unidades"
+)
 
 public class UnidadeController {
 
@@ -23,7 +29,7 @@ public class UnidadeController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UnidadeResponse> criar(
-            @RequestBody UnidadeRequest request
+            @Valid @RequestBody UnidadeRequest request
     ) {
 
         return ResponseEntity
@@ -55,7 +61,7 @@ public class UnidadeController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UnidadeResponse> atualizar(
             @PathVariable Long id,
-            @RequestBody UnidadeRequest request
+            @Valid @RequestBody UnidadeRequest request
     ) {
 
         return ResponseEntity.ok(

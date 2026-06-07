@@ -3,6 +3,8 @@ package com.raizesdonordeste.api.controller;
 import com.raizesdonordeste.api.request.ProdutoRequest;
 import com.raizesdonordeste.api.response.ProdutoResponse;
 import com.raizesdonordeste.application.service.ProdutoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/produtos")
 @RequiredArgsConstructor
+@Tag(
+        name = "Produtos",
+        description = "Operações relacionadas aos produtos"
+)
 
 public class ProdutoController {
 
@@ -22,7 +28,7 @@ public class ProdutoController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<ProdutoResponse> criar(
-            @RequestBody ProdutoRequest request
+           @Valid @RequestBody ProdutoRequest request
     ){
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -51,7 +57,7 @@ public class ProdutoController {
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<ProdutoResponse> atualizar(
             @PathVariable Long id,
-            @RequestBody ProdutoRequest request
+            @Valid @RequestBody ProdutoRequest request
     ){
         return ResponseEntity.ok(
                 produtoService.atualizar(id, request)

@@ -3,6 +3,8 @@ package com.raizesdonordeste.api.controller;
 import com.raizesdonordeste.api.request.EstoqueRequest;
 import com.raizesdonordeste.api.response.EstoqueResponse;
 import com.raizesdonordeste.application.service.EstoqueService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/estoques")
 @RequiredArgsConstructor
+@Tag(
+        name = "Estoque",
+        description = "Controle de estoque das unidades"
+)
 
 public class EstoqueController {
 
@@ -22,7 +28,7 @@ public class EstoqueController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<EstoqueResponse> criar(
-            @RequestBody EstoqueRequest request
+            @Valid @RequestBody EstoqueRequest request
     ) {
 
         return ResponseEntity
@@ -54,7 +60,7 @@ public class EstoqueController {
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<EstoqueResponse> atualizar(
             @PathVariable Long id,
-            @RequestBody EstoqueRequest request
+            @Valid @RequestBody EstoqueRequest request
     ) {
 
         return ResponseEntity.ok(
