@@ -1,4 +1,4 @@
-package com.raizesdonordeste.infraestructure.config;
+package com.raizesdonordeste.infraestructure.exception;
 
 public class ResourceNotFoundException
         extends RuntimeException {

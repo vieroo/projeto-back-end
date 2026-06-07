@@ -4,7 +4,7 @@ import com.raizesdonordeste.api.request.LoginRequest;
 import com.raizesdonordeste.api.request.RegistroUsuarioRequest;
 import com.raizesdonordeste.api.response.AuthResponse;
 import com.raizesdonordeste.application.service.AuthService;
-import com.raizesdonordeste.infraestructure.config.ErrorResponse;
+import com.raizesdonordeste.infraestructure.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

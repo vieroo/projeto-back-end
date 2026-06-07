@@ -1,4 +1,4 @@
-package com.raizesdonordeste.infraestructure.config;
+package com.raizesdonordeste.infraestructure.exception;
 
 import java.time.LocalDateTime;
 

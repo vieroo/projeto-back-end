@@ -2,7 +2,7 @@ package com.raizesdonordeste.api.controller;
 
 import com.raizesdonordeste.api.response.FidelidadeResponse;
 import com.raizesdonordeste.application.service.FidelidadeService;
-import com.raizesdonordeste.infraestructure.config.ErrorResponse;
+import com.raizesdonordeste.infraestructure.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

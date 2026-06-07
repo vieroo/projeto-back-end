@@ -4,8 +4,8 @@ import com.raizesdonordeste.api.request.UnidadeRequest;
 import com.raizesdonordeste.api.response.UnidadeResponse;
 import com.raizesdonordeste.domain.entity.Unidade;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
-import com.raizesdonordeste.infraestructure.config.BusinessException;
-import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.exception.BusinessException;
+import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

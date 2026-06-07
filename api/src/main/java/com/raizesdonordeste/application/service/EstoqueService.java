@@ -8,8 +8,7 @@ import com.raizesdonordeste.domain.entity.Unidade;
 import com.raizesdonordeste.domain.repository.EstoqueRepository;
 import com.raizesdonordeste.domain.repository.ProdutoRepository;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
-import com.raizesdonordeste.infraestructure.config.BusinessException;
-import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

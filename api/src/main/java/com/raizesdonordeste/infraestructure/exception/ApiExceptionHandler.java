@@ -1,4 +1,4 @@
-package com.raizesdonordeste.infraestructure.config;
+package com.raizesdonordeste.infraestructure.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
