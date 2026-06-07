@@ -8,6 +8,8 @@ import com.raizesdonordeste.domain.entity.Unidade;
 import com.raizesdonordeste.domain.repository.EstoqueRepository;
 import com.raizesdonordeste.domain.repository.ProdutoRepository;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
+import com.raizesdonordeste.infraestructure.config.BusinessException;
+import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +30,12 @@ public class EstoqueService {
         Produto produto = produtoRepository.findById(
                 request.produtoId()
         ).orElseThrow(() ->
-                new RuntimeException("Produto não encontrado"));
+               new ResourceNotFoundException("Produto não encontrado"));
 
         Unidade unidade = unidadeRepository.findById(
                 request.unidadeId()
         ).orElseThrow(() ->
-                new RuntimeException("Unidade não encontrada"));
+               new ResourceNotFoundException("Unidade não encontrada"));
 
         Estoque estoque = Estoque.builder()
                 .produto(produto)
@@ -58,7 +60,7 @@ public class EstoqueService {
 
         Estoque estoque = estoqueRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Estoque não encontrado"));
+                       new ResourceNotFoundException("Estoque nao encontrado"));
 
         return converter(estoque);
     }
@@ -70,7 +72,7 @@ public class EstoqueService {
 
         Estoque estoque = estoqueRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Estoque não encontrado"));
+                       new ResourceNotFoundException("Estoque nao encontrado"));
 
         Produto produto = produtoRepository.findById(
                 request.produtoId()
@@ -93,7 +95,7 @@ public class EstoqueService {
 
         Estoque estoque = estoqueRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Estoque não encontrado"));
+                       new ResourceNotFoundException("Estoque nao encontrado"));
 
         estoqueRepository.delete(estoque);
     }

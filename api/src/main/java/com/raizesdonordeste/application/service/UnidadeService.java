@@ -4,6 +4,8 @@ import com.raizesdonordeste.api.request.UnidadeRequest;
 import com.raizesdonordeste.api.response.UnidadeResponse;
 import com.raizesdonordeste.domain.entity.Unidade;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
+import com.raizesdonordeste.infraestructure.config.BusinessException;
+import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +42,7 @@ public class UnidadeService {
     ) {
         Unidade unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Unidade não encontrada"));
+                       new BusinessException("Unidade nao encontrada"));
 
         return converter(unidade);
     }
@@ -51,7 +53,7 @@ public class UnidadeService {
     ) {
         Unidade unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Unidade não encontrada"));
+                       new ResourceNotFoundException("Unidade nao encontrada"));
 
         unidade.setNome(request.nome());
 
@@ -63,7 +65,7 @@ public class UnidadeService {
     public void deletar(Long id) {
         Unidade unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Unidade não encontrada"));
+                       new ResourceNotFoundException("Unidade nao encontrada"));
 
         unidadeRepository.delete(unidade);
     }

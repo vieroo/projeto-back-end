@@ -13,4 +13,5 @@ public interface EstoqueRepository extends JpaRepository<Estoque, Long>{
             Long produtoId,
             Long unidadeId
     );
+
 }

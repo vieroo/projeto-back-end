@@ -5,8 +5,11 @@ import com.raizesdonordeste.api.request.PedidoRequest;
 import com.raizesdonordeste.api.response.ItemPedidoResponse;
 import com.raizesdonordeste.api.response.PedidoResponse;
 import com.raizesdonordeste.domain.entity.*;
+import com.raizesdonordeste.domain.enums.CanalPedido;
 import com.raizesdonordeste.domain.enums.StatusPedido;
 import com.raizesdonordeste.domain.repository.*;
+import com.raizesdonordeste.infraestructure.config.BusinessException;
+import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,16 +30,22 @@ public class PedidoService {
     private final EstoqueRepository estoqueRepository;
     private final FidelidadeRepository fidelidadeRepository;
     private final PagamentoMockService pagamentoMockService;
+    private final UnidadeRepository unidadeRepository;
 
     @Transactional
     public PedidoResponse criar(PedidoRequest request) {
 
         Usuario cliente = usuarioRepository.findById(request.clientId())
                 .orElseThrow(() ->
-                        new RuntimeException("Cliente não encontrado"));
+                       new ResourceNotFoundException("Cliente nao encontrado"));
+
+        Unidade unidade = unidadeRepository.findById(request.unidadeId())
+                .orElseThrow(() ->
+                       new ResourceNotFoundException("Unidade nao encontrada"));
 
         Pedido pedido = Pedido.builder()
                 .cliente(cliente)
+                .unidade(unidade)
                 .status(StatusPedido.AGUARDANDO_PAGAMENTO)
                 .canalPedido(request.canalPedido())
                 .total(BigDecimal.ZERO)
@@ -52,7 +61,7 @@ public class PedidoService {
 
             Produto produto = produtoRepository.findById(itemRequest.produtoId())
                     .orElseThrow(() ->
-                            new RuntimeException("Produto nao encontrado"));
+                           new ResourceNotFoundException("Produto nao encontrado"));
 
             Estoque estoque = estoqueRepository
                     .findByProdutoIdAndUnidadeId(
@@ -60,10 +69,10 @@ public class PedidoService {
                         request.unidadeId()
                     )
                     .orElseThrow(() ->
-                            new RuntimeException("Estoque nao encontrado"));
+                           new ResourceNotFoundException("Estoque nao encontrado"));
 
             if (estoque.getQuantidade() < itemRequest.quantidade()) {
-                throw new RuntimeException(
+                throw new BusinessException(
                         "Estoque insuficiente para o produto: "
                                 + produto.getNome()
                 );
@@ -128,6 +137,7 @@ public class PedidoService {
 
         } else {
 
+            devolverItensAoEstoque(pedido);
             pedido.setStatus(StatusPedido.CANCELADO);
         }
 
@@ -161,7 +171,7 @@ public class PedidoService {
 
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Pedido nao encontrado"));
+                       new ResourceNotFoundException("Pedido nao encontrado"));
 
         return new PedidoResponse(
                 pedido.getId(),
@@ -172,6 +182,23 @@ public class PedidoService {
         );
     }
 
+    public List<PedidoResponse> buscarPorCanal(
+            CanalPedido canalPedido
+    ) {
+
+        return pedidoRepository
+                .findByCanalPedido(canalPedido)
+                .stream()
+                .map(pedido -> new PedidoResponse(
+                        pedido.getId(),
+                        pedido.getStatus(),
+                        pedido.getCanalPedido(),
+                        pedido.getTotal(),
+                        converterItens(pedido.getId())
+                ))
+                .toList();
+    }
+
     public PedidoResponse atualizarStatus(
             Long id,
             StatusPedido status
@@ -179,11 +206,11 @@ public class PedidoService {
 
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Pedido não encontrado"));
+                       new ResourceNotFoundException("Pedido nao encontrado"));
 
         if (pedido.getStatus() == StatusPedido.CANCELADO) {
-            throw new RuntimeException(
-                    "Pedido cancelado não pode ser atualizado"
+            throw new BusinessException(
+                    "Pedido cancelado nao pode ser atualizado"
             );
         }
 
@@ -198,6 +225,63 @@ public class PedidoService {
                 pedido.getTotal(),
                 converterItens(pedido.getId())
         );
+    }
+
+    public PedidoResponse cancelarPedido (
+            Long id
+    ) {
+
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() ->
+                       new ResourceNotFoundException("Pedido nao encontrado"));
+
+        if (pedido.getStatus() == StatusPedido.CANCELADO) {
+            throw new BusinessException("Pedido ja esta cancelado");
+        }
+
+        if (pedido.getStatus() == StatusPedido.EM_PREPARO
+                || pedido.getStatus() == StatusPedido.PRONTO
+                || pedido.getStatus() == StatusPedido.ENTREGUE) {
+
+            throw new BusinessException(
+                    "Pedido nao pode mais ser cancelado"
+            );
+        }
+
+        devolverItensAoEstoque(pedido);
+        pedido.setStatus(StatusPedido.CANCELADO);
+
+        return new PedidoResponse(
+                pedido.getId(),
+                pedido.getStatus(),
+                pedido.getCanalPedido(),
+                pedido.getTotal(),
+                converterItens(pedido.getId())
+        );
+
+    }
+
+    private void devolverItensAoEstoque(Pedido pedido) {
+
+        List<ItemPedido> itens =
+                itemPedidoRepository.findByPedidoId(pedido.getId());
+
+        for (ItemPedido item : itens) {
+
+            Estoque estoque = estoqueRepository
+                    .findByProdutoIdAndUnidadeId(
+                            item.getProduto().getId(),
+                            pedido.getUnidade().getId()
+                    )
+                    .orElseThrow(() ->
+                           new ResourceNotFoundException("Estoque nao encontrado"));
+
+            estoque.setQuantidade(
+                    estoque.getQuantidade() + item.getQuantidade()
+            );
+
+            estoqueRepository.save(estoque);
+        }
     }
 
     private List<ItemPedidoResponse> converterItens(

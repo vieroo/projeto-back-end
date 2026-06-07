@@ -6,6 +6,7 @@ import com.raizesdonordeste.api.response.AuthResponse;
 import com.raizesdonordeste.domain.entity.Usuario;
 import com.raizesdonordeste.domain.enums.Role;
 import com.raizesdonordeste.domain.repository.UsuarioRepository;
+import com.raizesdonordeste.infraestructure.config.BusinessException;
 import com.raizesdonordeste.infraestructure.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,7 +49,7 @@ public class AuthService {
                 );
 
         if (!senhaValida) {
-            throw new RuntimeException("E-mail ou senha inválido.");
+            throw new BusinessException("E-mail ou senha inválido.");
         }
 
         String token =

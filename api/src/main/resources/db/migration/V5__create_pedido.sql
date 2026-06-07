@@ -3,6 +3,8 @@ CREATE TABLE pedido (
 
     cliente_id BIGINT NOT NULL,
 
+    unidade_id BIGINT NOT NULL,
+
     status VARCHAR(50) NOT NULL,
 
     canal_pedido VARCHAR(50) NOT NULL,
@@ -11,5 +13,9 @@ CREATE TABLE pedido (
 
     CONSTRAINT fk_pedido_cliente
         FOREIGN KEY (cliente_id)
-            REFERENCES usuario(id)
+            REFERENCES usuario(id),
+
+    CONSTRAINT fk_pedido_unidade
+        FOREIGN KEY (unidade_id)
+            REFERENCES unidade(id)
 );

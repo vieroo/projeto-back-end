@@ -4,6 +4,7 @@ import com.raizesdonordeste.api.request.AtualizarStatusPedidoRequest;
 import com.raizesdonordeste.api.request.PedidoRequest;
 import com.raizesdonordeste.api.response.PedidoResponse;
 import com.raizesdonordeste.application.service.PedidoService;
+import com.raizesdonordeste.domain.enums.CanalPedido;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,16 @@ public class PedidoController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
-    public ResponseEntity<List<PedidoResponse>> listar() {
+    public ResponseEntity<List<PedidoResponse>> listar(
+            @RequestParam(required = false)
+            CanalPedido canalPedido
+    ) {
+
+        if (canalPedido != null) {
+            return ResponseEntity.ok(
+                    pedidoService.buscarPorCanal(canalPedido)
+            );
+        }
 
         return ResponseEntity.ok(
                 pedidoService.listar()
@@ -63,6 +73,17 @@ public class PedidoController {
                         id,
                         request.status()
                 )
+        );
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    @PreAuthorize("hasRole('CLIENTE')")
+    public ResponseEntity<PedidoResponse> cancelar(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                pedidoService.cancelarPedido(id)
         );
     }
 }

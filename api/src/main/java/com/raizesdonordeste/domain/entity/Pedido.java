@@ -24,6 +24,10 @@ public class Pedido {
     @JoinColumn(name = "cliente_id", nullable = false)
     private Usuario cliente;
 
+    @ManyToOne
+    @JoinColumn(name = "unidade_id")
+    private Unidade unidade;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusPedido status;

@@ -4,6 +4,8 @@ import com.raizesdonordeste.api.request.ProdutoRequest;
 import com.raizesdonordeste.api.response.ProdutoResponse;
 import com.raizesdonordeste.domain.entity.Produto;
 import com.raizesdonordeste.domain.repository.ProdutoRepository;
+import com.raizesdonordeste.infraestructure.config.BusinessException;
+import com.raizesdonordeste.infraestructure.config.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +41,7 @@ public class ProdutoService {
     public ProdutoResponse buscarPorId(Long id) {
 
         Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() ->new ResourceNotFoundException("Produto não encontrado"));
 
         return converter(produto);
     }
@@ -49,7 +51,7 @@ public class ProdutoService {
             ProdutoRequest request
     ) {
         Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() ->new ResourceNotFoundException("Produto não encontrado"));
 
         produto.setNome(request.nome());
         produto.setPreco(request.preco());
@@ -61,7 +63,7 @@ public class ProdutoService {
 
     public void deletar(Long id){
         Produto produto = produtoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() ->new ResourceNotFoundException("Produto não encontrado"));
 
         produtoRepository.delete(produto);
     }
