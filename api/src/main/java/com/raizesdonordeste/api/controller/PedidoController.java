@@ -7,6 +7,7 @@ import com.raizesdonordeste.application.service.PedidoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @PostMapping
+    @PreAuthorize("hasRole('CLIENTE')")
     public ResponseEntity<PedidoResponse> criar(
             @RequestBody PedidoRequest request
     ) {
@@ -30,6 +32,7 @@ public class PedidoController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<List<PedidoResponse>> listar() {
 
         return ResponseEntity.ok(
@@ -38,6 +41,7 @@ public class PedidoController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<PedidoResponse> buscarPorId(
             @PathVariable Long id
     ) {
@@ -48,6 +52,7 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<PedidoResponse> atualizarStatus(
             @PathVariable Long id,
             @RequestBody AtualizarStatusPedidoRequest request

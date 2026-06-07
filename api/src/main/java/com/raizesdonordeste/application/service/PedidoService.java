@@ -52,7 +52,7 @@ public class PedidoService {
 
             Produto produto = produtoRepository.findById(itemRequest.produtoId())
                     .orElseThrow(() ->
-                            new RuntimeException("Produto não encontrado"));
+                            new RuntimeException("Produto nao encontrado"));
 
             Estoque estoque = estoqueRepository
                     .findByProdutoIdAndUnidadeId(
@@ -60,7 +60,7 @@ public class PedidoService {
                         request.unidadeId()
                     )
                     .orElseThrow(() ->
-                            new RuntimeException("Estoque não encontrado"));
+                            new RuntimeException("Estoque nao encontrado"));
 
             if (estoque.getQuantidade() < itemRequest.quantidade()) {
                 throw new RuntimeException(
@@ -161,7 +161,7 @@ public class PedidoService {
 
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Pedido não encontrado"));
+                        new RuntimeException("Pedido nao encontrado"));
 
         return new PedidoResponse(
                 pedido.getId(),

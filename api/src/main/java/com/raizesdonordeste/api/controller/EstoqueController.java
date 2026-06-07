@@ -6,6 +6,7 @@ import com.raizesdonordeste.application.service.EstoqueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class EstoqueController {
     private final EstoqueService estoqueService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<EstoqueResponse> criar(
             @RequestBody EstoqueRequest request
     ) {
@@ -29,6 +31,7 @@ public class EstoqueController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<List<EstoqueResponse>> listar() {
 
         return ResponseEntity.ok(
@@ -37,6 +40,7 @@ public class EstoqueController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<EstoqueResponse> buscarPorId(
             @PathVariable Long id
     ) {
@@ -47,6 +51,7 @@ public class EstoqueController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE')")
     public ResponseEntity<EstoqueResponse> atualizar(
             @PathVariable Long id,
             @RequestBody EstoqueRequest request
@@ -58,6 +63,7 @@ public class EstoqueController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deletar(
             @PathVariable Long id
     ) {
