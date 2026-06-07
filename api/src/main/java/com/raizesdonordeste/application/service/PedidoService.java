@@ -10,6 +10,7 @@ import com.raizesdonordeste.domain.enums.StatusPedido;
 import com.raizesdonordeste.domain.repository.*;
 import com.raizesdonordeste.infraestructure.exception.BusinessException;
 import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,19 +30,22 @@ public class PedidoService {
     private final ProdutoRepository produtoRepository;
     private final EstoqueRepository estoqueRepository;
     private final FidelidadeRepository fidelidadeRepository;
-    private final PagamentoMockService pagamentoMockService;
     private final UnidadeRepository unidadeRepository;
+    private final PagamentoMockService pagamentoMockService;
+    private final AuditoriaService auditoriaService;
+
+    private final SecurityUtils securityUtils;
 
     @Transactional
     public PedidoResponse criar(PedidoRequest request) {
 
         Usuario cliente = usuarioRepository.findById(request.clientId())
                 .orElseThrow(() ->
-                       new ResourceNotFoundException("Cliente nao encontrado"));
+                        new ResourceNotFoundException("Cliente não encontrado"));
 
         Unidade unidade = unidadeRepository.findById(request.unidadeId())
                 .orElseThrow(() ->
-                       new ResourceNotFoundException("Unidade nao encontrada"));
+                        new ResourceNotFoundException("Unidade não encontrada"));
 
         Pedido pedido = Pedido.builder()
                 .cliente(cliente)
@@ -61,17 +65,18 @@ public class PedidoService {
 
             Produto produto = produtoRepository.findById(itemRequest.produtoId())
                     .orElseThrow(() ->
-                           new ResourceNotFoundException("Produto nao encontrado"));
+                            new ResourceNotFoundException("Produto não encontrado"));
 
             Estoque estoque = estoqueRepository
                     .findByProdutoIdAndUnidadeId(
-                        produto.getId(),
-                        request.unidadeId()
+                            produto.getId(),
+                            unidade.getId()
                     )
                     .orElseThrow(() ->
-                           new ResourceNotFoundException("Estoque nao encontrado"));
+                            new ResourceNotFoundException("Estoque não encontrado"));
 
             if (estoque.getQuantidade() < itemRequest.quantidade()) {
+
                 throw new BusinessException(
                         "Estoque insuficiente para o produto: "
                                 + produto.getNome()
@@ -109,6 +114,42 @@ public class PedidoService {
 
         pedido.setTotal(total);
 
+        pedido = pedidoRepository.save(pedido);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "CRIAR",
+                "PEDIDO",
+                pedido.getId()
+        );
+
+        return new PedidoResponse(
+                pedido.getId(),
+                pedido.getStatus(),
+                pedido.getCanalPedido(),
+                pedido.getTotal(),
+                itensResponse
+        );
+    }
+
+    @Transactional
+    public PedidoResponse processarPagamento(
+            Long pedidoId
+    ) {
+
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Pedido nao encontrado"
+                        ));
+
+        if (pedido.getStatus() != StatusPedido.AGUARDANDO_PAGAMENTO) {
+
+            throw new BusinessException(
+                    "Pedido nao esta aguardando pagamento"
+            );
+        }
+
         boolean pagamentoAprovado =
                 pagamentoMockService.processarPagamento();
 
@@ -116,18 +157,21 @@ public class PedidoService {
 
             pedido.setStatus(StatusPedido.PAGO);
 
-            int pontos = total.intValue() / 10;
+            int pontos = pedido.getTotal().intValue() / 10;
 
             Fidelidade fidelidade =
                     fidelidadeRepository
-                            .findByClienteId(cliente.getId())
+                            .findByClienteId(
+                                    pedido.getCliente().getId()
+                            )
                             .orElse(
                                     Fidelidade.builder()
-                                            .cliente(cliente)
+                                            .cliente(
+                                                    pedido.getCliente()
+                                            )
                                             .pontos(0)
                                             .build()
                             );
-
 
             fidelidade.setPontos(
                     fidelidade.getPontos() + pontos
@@ -138,19 +182,28 @@ public class PedidoService {
         } else {
 
             devolverItensAoEstoque(pedido);
-            pedido.setStatus(StatusPedido.CANCELADO);
+
+            pedido.setStatus(
+                    StatusPedido.CANCELADO
+            );
         }
 
         pedido = pedidoRepository.save(pedido);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "PAGAMENTO",
+                "PEDIDO",
+                pedido.getId()
+        );
 
         return new PedidoResponse(
                 pedido.getId(),
                 pedido.getStatus(),
                 pedido.getCanalPedido(),
                 pedido.getTotal(),
-                itensResponse
+                converterItens(pedido.getId())
         );
-
     }
 
     public List<PedidoResponse> listar() {
@@ -250,6 +303,13 @@ public class PedidoService {
 
         devolverItensAoEstoque(pedido);
         pedido.setStatus(StatusPedido.CANCELADO);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "CANCELAR",
+                "PEDIDO",
+                pedido.getId()
+        );
 
         return new PedidoResponse(
                 pedido.getId(),

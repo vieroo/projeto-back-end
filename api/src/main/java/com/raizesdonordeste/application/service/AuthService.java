@@ -17,8 +17,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditoriaService auditoriaService;
 
     private final JwtService jwtService;
 
@@ -43,6 +45,13 @@ public class AuthService {
                 .build();
 
         usuarioRepository.save(usuario);
+
+        auditoriaService.registrar(
+                request.email(),
+                "REGISTRO",
+                "USUARIO",
+                usuario.getId()
+        );
     }
 
     public AuthResponse login(
@@ -64,6 +73,13 @@ public class AuthService {
 
         String token =
                 jwtService.gerarToken(usuario.getEmail());
+
+        auditoriaService.registrar(
+                usuario.getEmail(),
+                "LOGIN",
+                "USUARIO",
+                usuario.getId()
+        );
 
         return  new AuthResponse(token);
     }

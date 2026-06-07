@@ -6,6 +6,7 @@ import com.raizesdonordeste.domain.entity.Unidade;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
 import com.raizesdonordeste.infraestructure.exception.BusinessException;
 import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,8 @@ import java.util.List;
 public class UnidadeService {
 
     private final UnidadeRepository unidadeRepository;
+    private final AuditoriaService auditoriaService;
+    private final SecurityUtils securityUtils;
 
     public UnidadeResponse criar (
             UnidadeRequest request
@@ -25,6 +28,13 @@ public class UnidadeService {
                 .build();
 
         unidade = unidadeRepository.save(unidade);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "CRIAR",
+                "UNIDADE",
+                unidade.getId()
+        );
 
         return  converter(unidade);
     }
@@ -59,6 +69,13 @@ public class UnidadeService {
 
         unidade = unidadeRepository.save(unidade);
 
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "ATUALIZAR",
+                "UNIDADE",
+                unidade.getId()
+        );
+
         return converter(unidade);
     }
 
@@ -66,6 +83,13 @@ public class UnidadeService {
         Unidade unidade = unidadeRepository.findById(id)
                 .orElseThrow(() ->
                        new ResourceNotFoundException("Unidade nao encontrada"));
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "DELETAR",
+                "UNIDADE",
+                id
+        );
 
         unidadeRepository.delete(unidade);
     }

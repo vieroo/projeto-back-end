@@ -5,6 +5,7 @@ import com.raizesdonordeste.api.response.ProdutoResponse;
 import com.raizesdonordeste.domain.entity.Produto;
 import com.raizesdonordeste.domain.repository.ProdutoRepository;
 import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,8 @@ import java.util.List;
 public class ProdutoService {
 
     private final ProdutoRepository produtoRepository;
+    private final AuditoriaService auditoriaService;
+    private final SecurityUtils securityUtils;
 
     public ProdutoResponse criar (
             ProdutoRequest request
@@ -25,6 +28,13 @@ public class ProdutoService {
                 .build();
 
         produto = produtoRepository.save(produto);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "CRIAR",
+                "PRODUTO",
+                produto.getId()
+        );
 
         return converter(produto);
     }
@@ -57,12 +67,26 @@ public class ProdutoService {
 
         produto = produtoRepository.save(produto);
 
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "ATUALIZAR",
+                "PRODUTO",
+                produto.getId()
+        );
+
         return  converter(produto);
     }
 
     public void deletar(Long id){
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() ->new ResourceNotFoundException("Produto não encontrado"));
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "DELETAR",
+                "PRODUTO",
+                id
+        );
 
         produtoRepository.delete(produto);
     }

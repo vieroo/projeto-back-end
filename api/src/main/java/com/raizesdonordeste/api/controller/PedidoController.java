@@ -6,6 +6,7 @@ import com.raizesdonordeste.api.response.PedidoResponse;
 import com.raizesdonordeste.application.service.PedidoService;
 import com.raizesdonordeste.domain.enums.CanalPedido;
 import com.raizesdonordeste.infraestructure.exception.ErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -69,6 +70,35 @@ public class PedidoController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(pedidoService.criar(request));
+    }
+
+    @PostMapping("/{pedidoId}/pagamento")
+    @PreAuthorize("hasRole('CLIENTE')")
+    @Operation(summary = "Processar pagamento de um pedido")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pagamento processado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Pedido não pode ser pago"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pedido não encontrado"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Token não informado ou inválido"
+            )
+    })
+    public ResponseEntity<PedidoResponse> pagar(
+            @PathVariable Long pedidoId
+    ) {
+        return ResponseEntity.ok(
+                pedidoService.processarPagamento(pedidoId)
+        );
     }
 
     @GetMapping

@@ -9,6 +9,7 @@ import com.raizesdonordeste.domain.repository.EstoqueRepository;
 import com.raizesdonordeste.domain.repository.ProdutoRepository;
 import com.raizesdonordeste.domain.repository.UnidadeRepository;
 import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
+import com.raizesdonordeste.infraestructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ public class EstoqueService {
     private final EstoqueRepository estoqueRepository;
     private final ProdutoRepository produtoRepository;
     private final UnidadeRepository unidadeRepository;
+    private final AuditoriaService auditoriaService;
+    private final SecurityUtils securityUtils;
 
     public EstoqueResponse criar(
             EstoqueRequest request
@@ -43,6 +46,13 @@ public class EstoqueService {
                 .build();
 
         estoque = estoqueRepository.save(estoque);
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "CRIAR",
+                "ESTOQUE",
+                estoque.getId()
+        );
 
         return  converter(estoque);
     }
@@ -87,6 +97,13 @@ public class EstoqueService {
 
         estoque = estoqueRepository.save(estoque);
 
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "ATUALIZAR",
+                "ESTOQUE",
+                estoque.getId()
+        );
+
         return converter(estoque);
     }
 
@@ -95,6 +112,13 @@ public class EstoqueService {
         Estoque estoque = estoqueRepository.findById(id)
                 .orElseThrow(() ->
                        new ResourceNotFoundException("Estoque nao encontrado"));
+
+        auditoriaService.registrar(
+                securityUtils.getUsuarioLogado(),
+                "DELETAR",
+                "ESTOQUE",
+                id
+        );
 
         estoqueRepository.delete(estoque);
     }
