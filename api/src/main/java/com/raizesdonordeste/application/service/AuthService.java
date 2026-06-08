@@ -7,7 +7,9 @@ import com.raizesdonordeste.domain.entity.Usuario;
 import com.raizesdonordeste.domain.enums.Role;
 import com.raizesdonordeste.domain.repository.UsuarioRepository;
 import com.raizesdonordeste.infraestructure.exception.BusinessException;
+import com.raizesdonordeste.infraestructure.exception.ResourceNotFoundException;
 import com.raizesdonordeste.infraestructure.security.JwtService;
+import com.raizesdonordeste.infraestructure.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditoriaService auditoriaService;
+    private final SecurityUtils securityUtils;
 
     private final JwtService jwtService;
 
@@ -82,5 +85,28 @@ public class AuthService {
         );
 
         return  new AuthResponse(token);
+    }
+
+    public void alterarRole (
+        Long usuarioId,
+        Role novaRole
+    ) {
+
+        Usuario usuario =
+                usuarioRepository.findById(usuarioId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException(
+                                        "Usuário não encontrado"
+                                ));
+
+        if (usuario.getEmail().equals(securityUtils.getUsuarioLogado())) {
+            throw new BusinessException(
+                    "Você não pode alterar seu próprio perfil"
+            );
+        }
+
+        usuario.setRole(novaRole);
+
+        usuarioRepository.save(usuario);
     }
 }

@@ -1,10 +1,12 @@
 package com.raizesdonordeste.api.controller;
 
+import com.raizesdonordeste.api.request.AlterarRoleRequest;
 import com.raizesdonordeste.api.request.LoginRequest;
 import com.raizesdonordeste.api.request.RegistroUsuarioRequest;
 import com.raizesdonordeste.api.response.AuthResponse;
 import com.raizesdonordeste.application.service.AuthService;
 import com.raizesdonordeste.infraestructure.exception.ErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,10 +16,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -72,6 +72,7 @@ public class AuthController {
                     )
             )
     })
+
     public ResponseEntity<AuthResponse> login (
             @Valid @RequestBody LoginRequest request
     ) {
@@ -79,5 +80,35 @@ public class AuthController {
         return ResponseEntity.ok(
                 authService.login(request)
         );
+    }
+
+    @PatchMapping("/usuarios/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Alterar perfil de acesso do usuário")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Perfil alterado com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Acesso negado"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado"
+            )
+    })
+    public ResponseEntity<Void> alterarRole(
+            @PathVariable Long id,
+            @RequestBody AlterarRoleRequest request
+    ) {
+
+        authService.alterarRole(
+                id,
+                request.role()
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }
