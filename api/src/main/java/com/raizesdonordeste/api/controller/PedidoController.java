@@ -34,7 +34,7 @@ public class PedidoController {
     private final PedidoService pedidoService;
 
     @PostMapping
-    @PreAuthorize("hasRole('CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE', 'CLIENTE')")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "201",
@@ -73,7 +73,7 @@ public class PedidoController {
     }
 
     @PostMapping("/{pedidoId}/pagamento")
-    @PreAuthorize("hasRole('CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENTE')")
     @Operation(summary = "Processar pagamento de um pedido")
     @ApiResponses({
             @ApiResponse(
@@ -200,7 +200,7 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/cancelar")
-    @PreAuthorize("hasRole('CLIENTE')")
+    @PreAuthorize("hasAnyRole('ADMIN','ATENDENTE', 'CLIENTE')")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
