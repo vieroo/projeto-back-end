@@ -31,7 +31,7 @@ Antes de executar o projeto, certifique-se de possuir instalado:
 # Clonando o Projeto
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/vieroo/projeto-back-end.git
 cd api
 ```
 
